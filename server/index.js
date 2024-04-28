@@ -24,7 +24,25 @@ const io = new Server(expressServer, {
 
 io.on("connection", (socket) => {
   console.log(`user ${socket.id} connected!`);
+
+  //this is exclusive to the just connected user.
+  socket.emit("message", "welcome to chat App");
+
+  //to all users exept you
+  socket.broadcast.emit("message", `user${socket.id.substring(0, 5)} joined!`);
+
   socket.on("message", (data) => {
+    //this is to all users.
     io.emit("message", `${socket.id.substring(0, 5)}: ${data}`);
+  });
+  //when a user leave
+  socket.on("disconnect", () => {
+    socket.broadcast.emit(
+      "message",
+      `user "${socket.id.substring(0, 5)}" left!`
+    );
+  });
+  socket.on("activity", (name) => {
+    socket.broadcast.emit("activity", name);
   });
 });
